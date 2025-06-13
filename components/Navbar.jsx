@@ -23,7 +23,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const mobileMenuRef = useRef(null);
   const router = useRouter();
 
@@ -39,11 +39,10 @@ export default function Navbar() {
         setUser(activeUser);
         setSession(activeSession);
 
-        return { user, session };
+        return { user: activeUser, session: activeSession }; // Fix: use activeUser and activeSession
       } else {
         setUser(null);
         setSession(null);
-        setIsLoading(false);
 
         return null;
       }
@@ -51,7 +50,6 @@ export default function Navbar() {
       console.error("Error getting user session:", error);
       setUser(null);
       setSession(null);
-      setIsLoading(false);
 
       return null;
     } finally {
@@ -63,13 +61,6 @@ export default function Navbar() {
   useEffect(() => {
     refreshUserSession();
   }, []);
-
-  // Redirect if user is already logged in
-  useEffect(() => {
-    if (user && session) {
-      router.push("/");
-    }
-  }, [user, session, router]);
 
   // Close navbar when clicking outside of it or any item in it (except search)
   useEffect(() => {
@@ -153,17 +144,19 @@ export default function Navbar() {
               </Link>
             </div>
 
+            {/* Show loading state */}
             {isLoading && (
               <div className="flex items-center">
                 <Avatar className="h-8 w-8 cursor-pointer">
-                  <AvatarFallback className="bg-gradient-to-r  from-blue-600 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white">
+                  <AvatarFallback className="bg-gradient-to-r from-blue-600 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white">
                     -
                   </AvatarFallback>
                 </Avatar>
               </div>
             )}
 
-            {user && (
+            {/* Show user dropdown when user is logged in and not loading */}
+            {!isLoading && user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -226,7 +219,8 @@ export default function Navbar() {
               </DropdownMenu>
             )}
 
-            {!user && (
+            {/* Show login/signup buttons only when not loading and no user */}
+            {!isLoading && !user && (
               <div className="flex space-x-2">
                 <div>
                   <Link href="/auth?type=login">
@@ -287,7 +281,7 @@ export default function Navbar() {
           </div>
 
           <div className="border-t border-gray-700 pt-4 pb-3">
-            {user && (
+            {!isLoading && user && (
               <div className="flex items-center px-5 mb-3">
                 <div className="flex-shrink-0">
                   <Avatar className="h-8 w-8 border-2 border-gray-700">
@@ -307,7 +301,7 @@ export default function Navbar() {
               </div>
             )}
 
-            {user ? (
+            {!isLoading && user && (
               <div className="mt-3 px-2 space-y-1">
                 <Link
                   href="/profile"
@@ -332,7 +326,8 @@ export default function Navbar() {
                   Log out
                 </button>
               </div>
-            ) : (
+            )}
+            {!isLoading && !user && (
               <div className="mt-3 px-2 space-y-1">
                 <Link
                   href="/auth?type=login"
