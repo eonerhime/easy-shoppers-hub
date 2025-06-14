@@ -1,6 +1,6 @@
 "use client";
 
-import { createProductWithImage } from "@/actions/products/manageProductsActions";
+import { createProductWithImage } from "@/actions/products/createProductsWithImages";
 import { Button } from "@/components/ui/button";
 import {
   Select,
