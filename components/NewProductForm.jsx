@@ -199,6 +199,7 @@ const NewProductForm = () => {
             <SelectValue placeholder="Product Category" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">None</SelectItem>
             <SelectItem value="clothes">Clothes</SelectItem>
             <SelectItem value="shoes">Shoes</SelectItem>
             <SelectItem value="accessories">Accessories</SelectItem>
@@ -214,15 +215,18 @@ const NewProductForm = () => {
             <SelectValue placeholder="Product Sub-Category" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">None</SelectItem>
             <SelectItem value="bags">Bags</SelectItem>
             <SelectItem value="belts">Belts</SelectItem>
             <SelectItem value="blouses">Blouses</SelectItem>
+            <SelectItem value="boots">Boots</SelectItem>
             <SelectItem value="casuals">Casuals</SelectItem>
             <SelectItem value="hats">Hats</SelectItem>
             <SelectItem value="jackets">Jackets</SelectItem>
             <SelectItem value="loafers">Loafers</SelectItem>
             <SelectItem value="long-sleeves">Long-sleeves</SelectItem>
-            <SelectItem value="necklace">Necklace</SelectItem>
+            <SelectItem value="necklacs">Necklaces</SelectItem>
+            <SelectItem value="scarfs">Scarfs</SelectItem>
             <SelectItem value="shirts">Shirts</SelectItem>
             <SelectItem value="skirts">Skirts</SelectItem>
             <SelectItem value="sneakers">Sneakers</SelectItem>
@@ -233,7 +237,7 @@ const NewProductForm = () => {
           </SelectContent>
         </Select>
 
-        {/* Product gender options - FIXED */}
+        {/* Product gender options */}
         <Select
           value={formData.productGender}
           onValueChange={handleSelectChange("productGender")}
@@ -242,6 +246,7 @@ const NewProductForm = () => {
             <SelectValue placeholder="Product Gender" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">None</SelectItem>
             <SelectItem value="male">Male</SelectItem>
             <SelectItem value="female">Female</SelectItem>
             <SelectItem value="unisex">Unisex</SelectItem>
@@ -259,7 +264,7 @@ const NewProductForm = () => {
           className="border rounded-lg p-2 w-full max-w-xs"
         />
 
-        {/* Product sizes - FIXED */}
+        {/* Product sizes */}
         <Select
           value={formData.productSizes}
           onValueChange={handleSelectChange("productSizes")}
@@ -268,6 +273,7 @@ const NewProductForm = () => {
             <SelectValue placeholder="Product Sizes" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">None</SelectItem>
             <SelectItem value="small">S</SelectItem>
             <SelectItem value="medium">M</SelectItem>
             <SelectItem value="large">L</SelectItem>

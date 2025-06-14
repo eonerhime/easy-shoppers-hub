@@ -127,3 +127,49 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Add this to your globals.css or tailwind.css file */
+
+/* Hide scrollbar for carousel */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Line clamp utilities (if not already in your Tailwind config) */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Responsive carousel adjustments */
+@media (max-width: 640px) {
+  .product-carousel-container {
+    gap: 0.75rem; /* 3 in Tailwind */
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .product-carousel-container {
+    gap: 1rem; /* 4 in Tailwind */
+  }
+}
+
+@media (min-width: 1025px) {
+  .product-carousel-container {
+    gap: 1rem; /* 4 in Tailwind */
+  }
+}

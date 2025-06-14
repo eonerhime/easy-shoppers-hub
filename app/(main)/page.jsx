@@ -12,11 +12,19 @@ export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [groupedProducts, setGroupedProducts] = useState({});
 
+  const handleAddToCart = (product) => {
+    console.log("Adding to cart:", product);
+    // Your add to cart logic here
+    // For example:
+    // addToCart(product);
+    // showToast('Added to cart successfully!');
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        const { success, documents, error } = await getProductsWithImages();
+        const { success, documents } = await getProductsWithImages();
 
         if (success) {
           const allProducts = documents;
@@ -31,7 +39,6 @@ export default function HomePage() {
             return acc;
           }, {});
 
-          console.log("Grouped products by category:", grouped);
           setGroupedProducts(grouped);
           setProducts(allProducts); // Keep original if needed elsewhere
         }
@@ -81,13 +88,17 @@ export default function HomePage() {
           </div>
         )}
 
-        {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
-          <ProductCatalog
-            key={category}
-            category={category}
-            products={categoryProducts}
-          />
-        ))}
+        {Object.entries(groupedProducts)
+          // Sort categories alphabetically
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([category, categoryProducts]) => (
+            <ProductCatalog
+              key={category}
+              category={category}
+              products={categoryProducts}
+              onAddToCart={handleAddToCart}
+            />
+          ))}
       </main>
     </div>
   );
