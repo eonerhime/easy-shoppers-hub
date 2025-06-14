@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Minus, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
@@ -30,6 +30,7 @@ const initialFormData = {
 };
 
 const NewProductForm = () => {
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState(initialFormData);
   const [productQuantity, setProductQuantity] = useState(0);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -97,24 +98,33 @@ const NewProductForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    formData.productQuantity = productQuantity;
-    formData.isActive = "true";
-    formData.productSku = sku;
-    formData.file = selectedFile;
+    try {
+      formData.productQuantity = productQuantity;
+      formData.isActive = "true";
+      formData.productSku = sku;
+      formData.file = selectedFile;
 
-    const result = await createProductWithImage(formData);
+      console.log("Product details:", formData);
 
-    setFormData(initialFormData);
-    setProductQuantity(0);
-    setSelectedFile(null);
+      const result = await createProductWithImage(formData);
 
-    toast(
-      result.success
-        ? "Product created successfully"
-        : `Error creating product: ${result.error || "Unknown error"}`
-    );
+      if (!result.success) throw new Error(result.error || "Unknown error");
+      // Soft Satchel leather bag made from premium pigs skin
 
-    return { result: result.success, data: result.data, error: result.error };
+      toast(
+        result.success
+          ? "Product created successfully"
+          : `Error creating product: ${result.error || "Unknown error"}`
+      );
+
+      setFormData(initialFormData);
+      setProductQuantity(0);
+      fileInputRef.current.value = null;
+
+      return { result: result.success, data: result.data, error: result.error };
+    } catch (error) {
+      toast.error(`Error creating product: ${error.message}`);
+    }
   };
 
   return (
@@ -132,6 +142,7 @@ const NewProductForm = () => {
         </Label>
         <Input
           type="file"
+          ref={fileInputRef}
           name="productImage"
           accept="image/*"
           onChange={handleFileChange}
@@ -194,7 +205,7 @@ const NewProductForm = () => {
           </SelectContent>
         </Select>
 
-        {/* Products sub-categories - FIXED */}
+        {/* Products sub-categories */}
         <Select
           value={formData.productSubCategory}
           onValueChange={handleSelectChange("productSubCategory")}
@@ -203,17 +214,21 @@ const NewProductForm = () => {
             <SelectValue placeholder="Product Sub-Category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="sneakers">Sneakers</SelectItem>
-            <SelectItem value="loafers">Loafers</SelectItem>
+            <SelectItem value="bags">Bags</SelectItem>
             <SelectItem value="belts">Belts</SelectItem>
-            <SelectItem value="hats">Hats</SelectItem>
-            <SelectItem value="t-shirts">T-shirts</SelectItem>
-            <SelectItem value="long-sleeves">Long-sleeves</SelectItem>
-            <SelectItem value="trousers">Trousers</SelectItem>
-            <SelectItem value="skirts">Skirts</SelectItem>
             <SelectItem value="blouses">Blouses</SelectItem>
+            <SelectItem value="casuals">Casuals</SelectItem>
+            <SelectItem value="hats">Hats</SelectItem>
             <SelectItem value="jackets">Jackets</SelectItem>
+            <SelectItem value="loafers">Loafers</SelectItem>
+            <SelectItem value="long-sleeves">Long-sleeves</SelectItem>
             <SelectItem value="necklace">Necklace</SelectItem>
+            <SelectItem value="shirts">Shirts</SelectItem>
+            <SelectItem value="skirts">Skirts</SelectItem>
+            <SelectItem value="sneakers">Sneakers</SelectItem>
+            <SelectItem value="trekkers">Trekkers</SelectItem>
+            <SelectItem value="trousers">Trousers</SelectItem>
+            <SelectItem value="t-shirts">T-shirts</SelectItem>
             <SelectItem value="watches">Watches</SelectItem>
           </SelectContent>
         </Select>
@@ -255,9 +270,9 @@ const NewProductForm = () => {
           <SelectContent>
             <SelectItem value="small">S</SelectItem>
             <SelectItem value="medium">M</SelectItem>
-            <SelectItem value="large">Large</SelectItem>
-            <SelectItem value="x-large">X-Large</SelectItem>
-            <SelectItem value="xx-large">XX-Large</SelectItem>
+            <SelectItem value="large">L</SelectItem>
+            <SelectItem value="x-large">XL</SelectItem>
+            <SelectItem value="xx-large">XXL</SelectItem>
           </SelectContent>
         </Select>
 

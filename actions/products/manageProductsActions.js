@@ -1,79 +1,6 @@
 "use server";
 
-import { account, databases, storage } from "@/lib/appwrite";
-import { ID } from "appwrite";
-
-/**
- * Server Action: Upload file and create database record
- * @param {FormData} formData - Form data containing file and other fields
- * @returns {Promise} - Promise that resolves with document creation response
- */
-export async function uploadFileAndCreateDocument(formData) {
-  try {
-    const file = formData.file;
-    const name = formData.productName;
-    const description = formData.productDescription;
-    const price = parseFloat(formData.productPrice);
-    const category = formData.productCategory;
-    const subCategory = formData.productSubCategory;
-    const gender = formData.productGender;
-    const brand = formData.productBrand;
-    const sizes = formData.productSizes;
-    const quantity = parseInt(formData.productQuantity, 10);
-    const sku = formData.productSku;
-    const isActive = formData.isActive || "true"; // Default to true if not provided
-
-    if (!file) {
-      return { success: false, error: "No file provided" };
-    }
-
-    // Step 1: Upload file to storage
-    const fileResponse = await storage.createFile(
-      process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID,
-      ID.unique(),
-      file
-    );
-
-    // Step 2: Create document in database with file reference
-    const documentResponse = await databases.createDocument(
-      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-      process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID,
-      ID.unique(),
-      {
-        name,
-        description,
-        price,
-        category,
-        subCategory,
-        gender,
-        brand,
-        sizes,
-        quantity,
-        sku,
-        isActive,
-        // File-related fields
-        fileId: fileResponse.$id,
-        fileName: fileResponse.name,
-        fileSize: fileResponse.sizeOriginal,
-        fileMimeType: fileResponse.mimeType,
-        fileUrl: `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${fileResponse.$id}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-    );
-
-    return {
-      success: true,
-      data: {
-        file: fileResponse,
-        document: documentResponse,
-      },
-    };
-  } catch (error) {
-    console.error("Upload and document creation error:", error);
-    return { success: false, error: error.message };
-  }
-}
+import { databases, storage, ID } from "@/lib/appwrite";
 
 /**
  * Server Action: Create a product with image upload
@@ -81,7 +8,9 @@ export async function uploadFileAndCreateDocument(formData) {
  * @returns {Promise} - Promise that resolves with product creation response
  */
 export async function createProductWithImage(formData) {
-  let fileResponse = null; // Declare outside try block
+  let fileResponse = null;
+
+  console.log("FormData received in createProductWithImage:", formData);
 
   try {
     const file = formData.file;
@@ -116,6 +45,8 @@ export async function createProductWithImage(formData) {
       ID.unique(),
       file
     );
+
+    console.log("File Response:", fileResponse);
 
     // Create product document with image reference
     const productDocument = await databases.createDocument(
@@ -242,14 +173,19 @@ export async function createProductWithMultipleImages(formData) {
  */
 export async function getProductsWithImages() {
   try {
+    // Fetch all documents from the products collection
     const response = await databases.listDocuments(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-      process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID
+      process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID
     );
 
-    return { success: true, data: response };
+    return {
+      success: true,
+      documents: response.documents,
+    };
   } catch (error) {
     console.error("Error fetching products:", error);
+    console.error("Error details:", error.code, error.type);
     return { success: false, error: error.message };
   }
 }

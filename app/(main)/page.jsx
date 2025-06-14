@@ -1,12 +1,49 @@
 "use client";
 
+import { getProductsWithImages } from "@/actions/products/manageProductsActions";
+import ProductCatalog from "@/components/ProductCatalog";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [groupedProducts, setGroupedProducts] = useState({});
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        const { success, documents, error } = await getProductsWithImages();
+
+        if (success) {
+          const allProducts = documents;
+
+          // Group products by category
+          const grouped = allProducts.reduce((acc, product) => {
+            const category = product?.category;
+            if (!acc[category]) {
+              acc[category] = [];
+            }
+            acc[category].push(product);
+            return acc;
+          }, {});
+
+          console.log("Grouped products by category:", grouped);
+          setGroupedProducts(grouped);
+          setProducts(allProducts); // Keep original if needed elsewhere
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -43,6 +80,14 @@ export default function HomePage() {
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-900"></div>
           </div>
         )}
+
+        {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
+          <ProductCatalog
+            key={category}
+            category={category}
+            products={categoryProducts}
+          />
+        ))}
       </main>
     </div>
   );
