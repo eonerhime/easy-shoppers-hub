@@ -11,6 +11,7 @@ import {
   CreditCard,
   LogIn,
   ArrowLeft,
+  ArrowDown,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useCartStore from "@/hooks/useCartStore";
@@ -43,7 +44,13 @@ export default function CartPage() {
 
         const userData = await account.get();
 
-        if (userData) setUser(userData);
+        if (userData) {
+          // User IS authenticated
+          setUser(userData);
+        } else {
+          // User is NOT authenticated - redirect to auth
+          router.push("/auth");
+        }
       } catch (error) {
         console.error(`Error fetching user session:`, error);
 
@@ -206,7 +213,7 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {user ? (
+              {user && cartItems.length ? (
                 <Button
                   className="w-full mt-6 bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-purple-600hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white font-semibold cursor-pointer"
                   disabled={!cartItems.length}
@@ -218,10 +225,20 @@ export default function CartPage() {
               ) : (
                 <Button
                   className="w-full mt-6 bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white font-semibold cursor-pointer"
+                  disabled={!cartItems.length}
                   onClick={() => router.push("/auth?type=login")}
                 >
-                  <LogIn className="mr-2 h-5 w-5" />
-                  Login to Checkout
+                  {!cartItems.length ? (
+                    <>
+                      <p>Continue Shopping</p>
+                      <ArrowDown className="h-12 w-12" />
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="mr-2 h-5 w-5" />
+                      Login to Checkout
+                    </>
+                  )}
                 </Button>
               )}
             </div>

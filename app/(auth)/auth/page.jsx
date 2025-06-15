@@ -32,6 +32,7 @@ export default function LoginSignupPage() {
 
   useEffect(() => {
     const type = searchParams.get("type");
+
     setIsLogin(type === "login");
     setIsSignUp(type !== "login");
   }, [searchParams]);
@@ -67,11 +68,11 @@ export default function LoginSignupPage() {
   }, []);
 
   // Redirect if user is already logged in
-  useEffect(() => {
-    if (user && session) {
-      router.push("/");
-    }
-  }, [user, session, router]);
+  // useEffect(() => {
+  //   if (user && session) {
+  //     router.back();
+  //   }
+  // }, [user, session, router]);
 
   const handleLogin = async () => {
     return await loginAction(email, password);
@@ -107,16 +108,18 @@ export default function LoginSignupPage() {
       if (result.success) {
         toast.success(`${isLogin ? "Login" : "Signup"} successful!`);
 
+        // Refresh session data after successful login/signup
+
         // Clear form
         setEmail("");
         setPassword("");
 
-        // Refresh session data after successful login/signup
         const sessionData = await refreshUserSession();
 
         if (sessionData) {
-          // Redirect to home page
-          router.push("/");
+          // Redirect to previous viewed page
+
+          router.back();
         }
       } else {
         toast.error(result.error);
