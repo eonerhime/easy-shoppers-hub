@@ -1,23 +1,36 @@
 "use client";
 
-import { getProductsWithImages } from "@/actions/products/manageProductsActions";
+import { getProductsWithImages } from "@/actions/products/getProductsWithImages";
 import ProductCatalog from "@/components/ProductCatalog";
 import { Button } from "@/components/ui/button";
+import useCartStore from "@/hooks/useCartStore";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [groupedProducts, setGroupedProducts] = useState({});
+  const addToCart = useCartStore((state) => state.addToCart);
 
   const handleAddToCart = (product) => {
-    console.log("Adding to cart:", product);
-    // Your add to cart logic here
-    // For example:
-    // addToCart(product);
-    // showToast('Added to cart successfully!');
+    if (product) {
+      addToCart({
+        id: product.$id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        image: product.imageUrl,
+      });
+
+      toast.success("Added to Cart", {
+        description: `${product.name} has been added to your cart.`,
+
+        duration: 5000,
+      });
+    }
   };
 
   useEffect(() => {

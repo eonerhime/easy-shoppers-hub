@@ -1,4 +1,4 @@
-const { default: NewProductForm } = require("@/components/NewProductForm");
+import NewProductForm from "@/components/NewProductForm";
 
 function Page() {
   return <NewProductForm />;
