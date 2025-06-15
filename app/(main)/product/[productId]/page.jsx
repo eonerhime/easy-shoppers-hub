@@ -90,7 +90,6 @@ export default function ProductDetailPage({ params }) {
         </button>
 
         {/* Product details */}
-
         <div className="grid md:grid-cols-2 gap-8">
           <div className="relative overflow-hidden rounded-lg ">
             <Image
