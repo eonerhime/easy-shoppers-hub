@@ -11,7 +11,7 @@ export async function getProductsWithImages() {
     // Fetch all documents from the products collection
     const response = await databases.listDocuments(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-      process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID
+      process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID
     );
 
     return {

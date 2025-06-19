@@ -10,11 +10,10 @@ export async function getProductDetails(documentId) {
   try {
     const document = await databases.getDocument(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-      process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID,
+      process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID,
       documentId // Document ID
     );
 
-    console.log("Document retrieved:", document);
     return { success: true, data: document };
   } catch (error) {
     console.error("Error retrieving document:", error);

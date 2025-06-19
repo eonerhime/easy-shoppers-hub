@@ -7,7 +7,7 @@ export async function getRelatedProducts(category) {
   try {
     const response = await databases.listDocuments(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-      process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID,
+      process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID,
       [Query.equal("category", category), Query.limit(10)]
     );
 

@@ -1,38 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  ShoppingCart,
-  Trash2,
-  Plus,
-  Minus,
-  CreditCard,
-  LogIn,
-  ArrowLeft,
-  ArrowDown,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+import { TAX_RATE } from "@/config/constants";
 import useCartStore from "@/hooks/useCartStore";
 import { account } from "@/lib/appwrite";
+import {
+  ArrowDown,
+  ArrowLeft,
+  CreditCard,
+  LogIn,
+  Minus,
+  Plus,
+  ShoppingCart,
+  Trash2,
+} from "lucide-react";
 import Image from "next/image";
-import { TAX_RATE } from "@/config/constants";
-import createOrder from "@/actions/orders/create-order";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function CartPage() {
   const router = useRouter();
   const cartItems = useCartStore((state) => state.cart);
+  const setOrderItems = useCartStore((state) => state.setOrderItems);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
-  const clearCart = useCartStore((state) => state.clearCart);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
 
   // Simulate loading state for 1.5 seconds
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -72,22 +70,30 @@ export default function CartPage() {
   const tax = subtotal * TAX_RATE; // Assuming 10% tax
   const total = subtotal + tax;
 
-  const createOrderAndCheckout = async () => {
-    const data = {
-      formData: [],
-      formIdentifier: "order_form",
-      paymentAccountIdentifier: "stripe_payment",
-      products: cartItems.map((item) => ({
-        productId: item.id,
-        quantity: item.quantity,
+  const handleCheckout = () => {
+    const order = {
+      userId: user.$id,
+      status: "pending",
+      subtotal,
+      taxAmount: tax,
+      totalAmount: total,
+      currency: "USD",
+      name: user.name,
+      email: user.email,
+      products: cartItems.map((product) => ({
+        productId: product.id,
+        productName: product.name,
+        productPrice: product.price,
+        productCount: product.quantity,
+        productImage: product.image,
       })),
     };
 
-    const url = await createOrder(data);
+    // Put the order in state
+    setOrderItems(order);
 
-    clearCart();
-
-    router.push(url);
+    // Route user to the Checkout page
+    router.push("/checkout");
   };
 
   return (
@@ -96,6 +102,8 @@ export default function CartPage() {
         <h1 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 bg-gradient-to-r from-blue-600 via-teal-500 to-green-500 bg-clip-text text-transparent">
           Your Cart
         </h1>
+
+        {/* Back button to previous page */}
         <button
           className="mb-8 flex items-center text-purple-500 hover:text-purple-600 transition-colors duration-300 cursor-pointer"
           onClick={() => router.back()}
@@ -103,16 +111,19 @@ export default function CartPage() {
           <ArrowLeft className="mr-2 h-5 w-5" />
           Back
         </button>
+
+        {/* Show spinner while products are fetched */}
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-900"></div>
           </div>
         ) : (
+          // Display retrieved products
           <>
             <div>
-              {cartItems.map((item) => (
+              {cartItems.map((product) => (
                 <div
-                  key={item.id}
+                  key={product.id}
                   className=" p-4 sm:p-6 rounded-lg shadow-lg mb-4 relative overflow-hidden border-2 border-gray-200"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
@@ -121,18 +132,18 @@ export default function CartPage() {
                         width={64}
                         height={64}
                         quality={80}
-                        src={item.image}
-                        alt={item.name}
+                        src={product.image}
+                        alt={product.name}
                         className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-md"
                       />
 
                       <div className="flex-1">
                         <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 via-teal-500 to-green-500 bg-clip-text text-transparent line-clamp-1">
-                          {item.name}
+                          {product.name}
                         </h3>
 
                         <p className="text-gray-400">
-                          ${item?.price?.toFixed(2)}
+                          ${product?.price?.toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -142,7 +153,7 @@ export default function CartPage() {
                         <Button
                           size="icon"
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            updateQuantity(product.id, product.quantity - 1)
                           }
                           className="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white cursor-pointer"
                         >
@@ -152,9 +163,9 @@ export default function CartPage() {
                         <Input
                           type="number"
                           min="0"
-                          value={item.quantity}
+                          value={product.quantity}
                           onChange={(e) =>
-                            updateQuantity(item.id, parseInt(e.target.value))
+                            updateQuantity(product.id, parseInt(e.target.value))
                           }
                           className="w-16  border-gray-600 text-center bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 bg-clip-text text-transparent"
                         />
@@ -162,7 +173,7 @@ export default function CartPage() {
                         <Button
                           size="icon"
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            updateQuantity(product.id, product.quantity + 1)
                           }
                           className="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white cursor-pointer"
                         >
@@ -173,7 +184,7 @@ export default function CartPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(product.id)}
                         className="text-red-500 hover:text-red-600 hover:bg-red-100 rounded-full transition-colors duration-200 ml-4 cursor-pointer"
                       >
                         <Trash2 className="h-5 w-5" />
@@ -213,11 +224,12 @@ export default function CartPage() {
                 </div>
               </div>
 
+              {/* Proceed to checkout only if user is logged in and cart has items; disable button if no cart items*/}
               {user && cartItems.length ? (
                 <Button
                   className="w-full mt-6 bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-purple-600hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white font-semibold cursor-pointer"
                   disabled={!cartItems.length}
-                  onClick={createOrderAndCheckout}
+                  onClick={handleCheckout}
                 >
                   <CreditCard className="mr-2 h-5 w-5" />
                   Proceed to Checkout
@@ -245,6 +257,7 @@ export default function CartPage() {
           </>
         )}
 
+        {/* If cart is empty */}
         {!isLoading && cartItems.length === 0 && (
           <div className="text-center py-12">
             <ShoppingCart className="mx-auto h-16 w-16 text-gray-400 mb-4" />

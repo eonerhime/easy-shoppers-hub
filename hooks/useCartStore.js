@@ -5,6 +5,7 @@ const useCartStore = create()(
   persist(
     (set, get) => ({
       cart: [],
+      orderItems: {},
 
       addToCart: (newItem) => {
         const existingItem = get().cart.find((item) => item.id === newItem.id);
@@ -37,6 +38,12 @@ const useCartStore = create()(
         })),
 
       clearCart: () => set({ cart: [] }),
+
+      setOrderItems: (items) => set({ orderItems: items }),
+
+      getOrderItems: () => get().orderItems,
+
+      clearOrderItems: () => set({ orderItems: {} }),
     }),
 
     { name: "cart-storage" } // persist to localStorage

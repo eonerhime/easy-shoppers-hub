@@ -1,52 +1,132 @@
 "use client";
 
 import { createProductWithImage } from "@/actions/products/createProductsWithImages";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@radix-ui/react-dropdown-menu";
 import { Minus, Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { NumericFormat } from "react-number-format";
+import React, { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+
+const Label = ({ htmlFor, className, children }) => (
+  <label htmlFor={htmlFor} className={className}>
+    {children}
+  </label>
+);
+
+const Input = ({ type, ref, className, ...props }) => (
+  <input type={type} ref={ref} className={className} {...props} />
+);
+
+const Textarea = ({ className, ...props }) => (
+  <textarea className={className} {...props} />
+);
+
+const Button = ({ type, onClick, className, children, ...props }) => (
+  <button type={type} onClick={onClick} className={className} {...props}>
+    {children}
+  </button>
+);
+
+// Simple Select components
+const Select = ({ value, onValueChange, children }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSelect = (val) => {
+    onValueChange(val);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <SelectTrigger onClick={() => setIsOpen(!isOpen)} value={value} />
+      {isOpen && (
+        <SelectContent>
+          {React.Children.map(children, (child) =>
+            React.cloneElement(child, { onSelect: handleSelect })
+          )}
+        </SelectContent>
+      )}
+    </div>
+  );
+};
+
+const SelectTrigger = ({ onClick, value, className = "w-full max-w-xs" }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`${className} bg-white border border-gray-300 rounded-lg px-3 py-2 text-left focus:outline-none focus:ring-2 focus:ring-blue-500`}
+  >
+    <SelectValue value={value || "Please select an option"} />
+  </button>
+);
+
+const SelectValue = ({ placeholder = "Select option...", value }) => (
+  <span>{value === "none" ? placeholder : value}</span>
+);
+
+const SelectContent = ({ children }) => (
+  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-36 overflow-y-auto">
+    {children}
+  </div>
+);
+
+const SelectItem = ({ value, children, onSelect }) => (
+  <div
+    onClick={() => onSelect(value)}
+    className="px-3 py-2 hover:bg-blue-50 cursor-pointer"
+  >
+    {children}
+  </div>
+);
+
+const NumericFormat = ({
+  className,
+  value,
+  onChange,
+  placeholder,
+  ...props
+}) => (
+  <input
+    type="text"
+    className={className}
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    {...props}
+  />
+);
 
 const initialFormData = {
   productName: "",
+  productGender: "",
   productDescription: "",
+  productBrand: "",
+  productSize: "",
   productPrice: "",
+  productQuantity: 0,
   productCategory: "",
   productSubCategory: "",
-  productGender: "",
-  productBrand: "",
-  productSizes: "",
-  productQuantity: 0,
 };
 
-const NewProductForm = () => {
-  const fileInputRef = useRef(null);
+export default function ProductForm() {
   const [formData, setFormData] = useState(initialFormData);
-  const [productQuantity, setProductQuantity] = useState(0);
+  const [productQuantity, setProductQuantity] = useState(
+    formData.productQuantity
+  );
+  const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const sku =
     formData.productSubCategory +
     "-" +
     formData.productGender +
     "-" +
-    formData.productSizes;
+    formData.productSize;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (field) => (value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleFileChange = (e) => {
@@ -66,37 +146,49 @@ const NewProductForm = () => {
     }
   };
 
-  useEffect(() => {
-    console.log("Selected file state updated:", selectedFile);
-  }, [selectedFile]);
-
-  const handleSelectChange = (name) => (value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  // Function to handle increase quantity
-  const handleIncreaseQuantity = (e) => {
-    e.preventDefault();
+  const handleIncreaseQuantity = () => {
     setProductQuantity((prev) => prev + 1);
   };
 
-  // Function to handle decrease quantity
-  const handleDecreaseQuantity = (e) => {
-    e.preventDefault();
-
-    // Prevent negative quantity
-    if (productQuantity > 0) {
-      setProductQuantity((prev) => prev - 1);
-    } else {
-      toast.error("Quantity cannot be less than zero");
-    }
+  const handleDecreaseQuantity = () => {
+    setProductQuantity((prev) => Math.max(0, prev - 1));
   };
 
   const handleSubmit = async (e) => {
+    if (!e.target.checkValidity()) {
+      return; // Don't prevent default, let browser show validation
+    }
+
     e.preventDefault();
+
+    // Destructure the formData state values
+    const {
+      productName,
+      productGender,
+      productDescription,
+      productBrand,
+      productSize,
+      productPrice,
+      productQuantity,
+      productCategory,
+      productSubCategory,
+    } = formData;
+
+    // Validate content of fields prior to submit
+    if (
+      !productName.trim() ||
+      !productGender.trim() ||
+      !productDescription.trim() ||
+      !productBrand.trim() ||
+      !productSize ||
+      !productPrice.trim() ||
+      productQuantity <= 0 ||
+      !productCategory ||
+      !productSubCategory
+    ) {
+      toast.error("Please fill all fields");
+      return;
+    }
 
     try {
       formData.productQuantity = productQuantity;
@@ -104,17 +196,18 @@ const NewProductForm = () => {
       formData.productSku = sku;
       formData.file = selectedFile;
 
-      console.log("Product details:", formData);
+      console.log("Form Data", formData);
 
       const result = await createProductWithImage(formData);
 
       if (!result.success) throw new Error(result.error || "Unknown error");
-      // Soft Satchel leather bag made from premium pigs skin
 
       toast(
         result.success
-          ? "Product created successfully"
-          : `Error creating product: ${result.error || "Unknown error"}`
+          ? toast.success("Product created successfully")
+          : toast.error(
+              `Error creating product: ${result.error || "Unknown error"}`
+            )
       );
 
       setFormData(initialFormData);
@@ -128,200 +221,233 @@ const NewProductForm = () => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      encType="multipart/form-data"
-      className="flex flex-col gap-4 p-4 border rounded-lg shadow-md"
-    >
-      <h1 className="mb-4 uppercase font-bold">New Product</h1>
-
-      {/* Upload single product image */}
-      <div>
-        <Label htmlFor="image" className="block mb-2">
-          Upload Product Image{" "}
-        </Label>
-        <Input
-          type="file"
-          ref={fileInputRef}
-          name="productImage"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="border rounded-lg p-2 w-full max-w-xs"
-          required
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        {/* Product name */}
-        <input
-          type="text"
-          id="productName"
-          name="productName"
-          value={formData.productName}
-          onChange={handleInputChange}
-          placeholder="Enter product name"
-          className="border rounded-lg p-2 w-full max-w-xs"
-          required
-        />
-
-        {/* Product description */}
-        <Textarea
-          type="text"
-          id="productDescription"
-          name="productDescription"
-          value={formData.productDescription}
-          onChange={handleInputChange}
-          placeholder="Enter product description"
-          className="border rounded-lg p-2 w-full max-w-xs"
-          required
-        />
-
-        {/* Product price */}
-        <NumericFormat
-          name="productPrice"
-          value={formData.productPrice}
-          onChange={handleInputChange}
-          thousandSeparator=","
-          prefix="$"
-          decimalScale={2}
-          fixedDecimalScale
-          allowNegative={false}
-          placeholder="$0.00"
-          className="border rounded px-2 py-1 w-full max-w-xs"
-        />
-
-        {/* Product categories - FIXED */}
-        <Select
-          value={formData.productCategory}
-          onValueChange={handleSelectChange("productCategory")}
-        >
-          <SelectTrigger className="w-full max-w-xs">
-            <SelectValue placeholder="Product Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            <SelectItem value="clothes">Clothes</SelectItem>
-            <SelectItem value="shoes">Shoes</SelectItem>
-            <SelectItem value="accessories">Accessories</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Products sub-categories */}
-        <Select
-          value={formData.productSubCategory}
-          onValueChange={handleSelectChange("productSubCategory")}
-        >
-          <SelectTrigger className="w-full max-w-xs">
-            <SelectValue placeholder="Product Sub-Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            <SelectItem value="bags">Bags</SelectItem>
-            <SelectItem value="belts">Belts</SelectItem>
-            <SelectItem value="blouses">Blouses</SelectItem>
-            <SelectItem value="boots">Boots</SelectItem>
-            <SelectItem value="casuals">Casuals</SelectItem>
-            <SelectItem value="hats">Hats</SelectItem>
-            <SelectItem value="jackets">Jackets</SelectItem>
-            <SelectItem value="loafers">Loafers</SelectItem>
-            <SelectItem value="long-sleeves">Long-sleeves</SelectItem>
-            <SelectItem value="necklacs">Necklaces</SelectItem>
-            <SelectItem value="scarfs">Scarfs</SelectItem>
-            <SelectItem value="shirts">Shirts</SelectItem>
-            <SelectItem value="skirts">Skirts</SelectItem>
-            <SelectItem value="sneakers">Sneakers</SelectItem>
-            <SelectItem value="trekkers">Trekkers</SelectItem>
-            <SelectItem value="trousers">Trousers</SelectItem>
-            <SelectItem value="t-shirts">T-shirts</SelectItem>
-            <SelectItem value="watches">Watches</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Product gender options */}
-        <Select
-          value={formData.productGender}
-          onValueChange={handleSelectChange("productGender")}
-        >
-          <SelectTrigger className="w-full max-w-xs">
-            <SelectValue placeholder="Product Gender" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            <SelectItem value="male">Male</SelectItem>
-            <SelectItem value="female">Female</SelectItem>
-            <SelectItem value="unisex">Unisex</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Brand name of product */}
-        <Input
-          type="text"
-          id="productBrand"
-          name="productBrand"
-          value={formData.productBrand}
-          onChange={handleInputChange}
-          placeholder="Enter product brand"
-          className="border rounded-lg p-2 w-full max-w-xs"
-        />
-
-        {/* Product sizes */}
-        <Select
-          value={formData.productSizes}
-          onValueChange={handleSelectChange("productSizes")}
-        >
-          <SelectTrigger className="w-full max-w-xs">
-            <SelectValue placeholder="Product Sizes" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            <SelectItem value="small">S</SelectItem>
-            <SelectItem value="medium">M</SelectItem>
-            <SelectItem value="large">L</SelectItem>
-            <SelectItem value="x-large">XL</SelectItem>
-            <SelectItem value="xx-large">XXL</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Product quantity */}
-        <div className="flex flex-row items-center gap-2">
-          <Button
-            type="button"
-            onClick={handleDecreaseQuantity}
-            className="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white w-[40px] h-[40px] flex items-center justify-center"
-          >
-            <Minus />
-          </Button>
-          <Input
-            type="number"
-            id="productQuantity"
-            name="productQuantity"
-            value={productQuantity}
-            onChange={(e) =>
-              setProductQuantity(e.target.value ? parseInt(e.target.value) : 0)
-            }
-            placeholder="0"
-            className="border rounded-lg p-2 w-auto h-[40px] flex items-center justify-center mt-2"
-            required
-          />
-          <Button
-            type="button"
-            onClick={handleIncreaseQuantity}
-            className="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white w-[40px] h-[40px] flex items-center justify-center"
-          >
-            <Plus />
-          </Button>
-        </div>
-        <Input type="hidden" id="sku" name="sku" value={sku} />
-      </div>
-
-      <Button
-        type="submit"
-        className="cursor-pointer bg-green-800 hover:bg-teal-600 text-white w-full max-w-xs"
+    <div className="max-w-4xl mx-auto p-8 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
       >
-        Create Product
-      </Button>
-    </form>
-  );
-};
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-6">
+          <h1 className="uppercase text-2xl font-bold text-white tracking-wide">
+            New Product
+          </h1>
+          <p className="text-blue-100 mt-1">
+            Fill in the details below to create your product
+          </p>
+        </div>
 
-export default NewProductForm;
+        <div className="p-8 space-y-6">
+          {/* Upload single product image */}
+          <div className="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors">
+            <Label
+              htmlFor="image"
+              className="block mb-3 text-lg font-semibold text-gray-700"
+            >
+              Upload Product Image
+            </Label>
+            <Input
+              type="file"
+              ref={fileInputRef}
+              name="productImage"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-4">
+              {/* Product name */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Name
+                </Label>
+                <Input
+                  type="text"
+                  id="productName"
+                  name="productName"
+                  value={formData.productName}
+                  onChange={handleInputChange}
+                  placeholder="Enter product name"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  required
+                />
+              </div>
+
+              {/* Product description */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Description
+                </Label>
+                <Textarea
+                  id="productDescription"
+                  name="productDescription"
+                  value={formData.productDescription}
+                  onChange={handleInputChange}
+                  placeholder="Enter product description"
+                  rows={4}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                  required
+                />
+              </div>
+
+              {/* Product categories */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Category
+                </Label>
+                <Select
+                  value={formData.productCategory}
+                  onValueChange={handleSelectChange("productCategory")}
+                >
+                  <SelectItem value="clothes">Clothes</SelectItem>
+                  <SelectItem value="shoes">Shoes</SelectItem>
+                  <SelectItem value="accessories">Accessories</SelectItem>
+                </Select>
+              </div>
+
+              {/* Products sub-categories */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Sub-Category
+                </Label>
+                <Select
+                  value={formData.productSubCategory}
+                  onValueChange={handleSelectChange("productSubCategory")}
+                >
+                  <SelectItem value="bags">Bags</SelectItem>
+                  <SelectItem value="belts">Belts</SelectItem>
+                  <SelectItem value="blouses">Blouses</SelectItem>
+                  <SelectItem value="boots">Boots</SelectItem>
+                  <SelectItem value="casuals">Casuals</SelectItem>
+                  <SelectItem value="hats">Hats</SelectItem>
+                  <SelectItem value="jackets">Jackets</SelectItem>
+                  <SelectItem value="loafers">Loafers</SelectItem>
+                  <SelectItem value="long-sleeves">Long-sleeves</SelectItem>
+                  <SelectItem value="necklacs">Necklaces</SelectItem>
+                  <SelectItem value="scarfs">Scarfs</SelectItem>
+                  <SelectItem value="shirts">Shirts</SelectItem>
+                  <SelectItem value="skirts">Skirts</SelectItem>
+                  <SelectItem value="sneakers">Sneakers</SelectItem>
+                  <SelectItem value="trekkers">Trekkers</SelectItem>
+                  <SelectItem value="trousers">Trousers</SelectItem>
+                  <SelectItem value="t-shirts">T-shirts</SelectItem>
+                  <SelectItem value="watches">Watches</SelectItem>
+                </Select>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-4">
+              {/* Product gender options */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Gender
+                </Label>
+                <Select
+                  value={formData.productGender}
+                  onValueChange={handleSelectChange("productGender")}
+                >
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="unisex">Unisex</SelectItem>
+                </Select>
+              </div>
+
+              {/* Brand name of product */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Brand
+                </Label>
+                <Input
+                  type="text"
+                  id="productBrand"
+                  name="productBrand"
+                  value={formData.productBrand}
+                  onChange={handleInputChange}
+                  placeholder="Enter product brand"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+              </div>
+
+              {/* Product sizes */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Sizes
+                </Label>
+                <Select
+                  value={formData.productSizes}
+                  onValueChange={handleSelectChange("productSize")}
+                >
+                  <SelectItem value="small">S</SelectItem>
+                  <SelectItem value="medium">M</SelectItem>
+                  <SelectItem value="large">L</SelectItem>
+                  <SelectItem value="x-large">XL</SelectItem>
+                  <SelectItem value="xx-large">XXL</SelectItem>
+                </Select>
+              </div>
+
+              {/* Product quantity */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Quantity
+                </Label>
+                <div className="flex items-center gap-3 justify-center bg-gray-50 rounded-lg p-4">
+                  <Button
+                    type="button"
+                    onClick={handleDecreaseQuantity}
+                    className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all"
+                  >
+                    <Minus size={16} />
+                  </Button>
+                  <div className="bg-white border-2 border-gray-300 rounded-lg px-6 py-2 min-w-[80px] text-center">
+                    <span className="text-xl font-bold text-gray-800">
+                      {productQuantity}
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleIncreaseQuantity}
+                    className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all"
+                  >
+                    <Plus size={16} />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Product price */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Price
+                </Label>
+                <NumericFormat
+                  name="productPrice"
+                  value={formData.productPrice}
+                  onChange={handleInputChange}
+                  placeholder="$0.00"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-lg font-semibold"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <Input type="hidden" id="sku" name="sku" value={sku} />
+
+          {/* Submit Button */}
+          <div className="pt-4">
+            <Button
+              type="submit"
+              onClick={handleSubmit}
+              className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-800 hover:to-blue-600 text-white py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              Create Product
+            </Button>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}
