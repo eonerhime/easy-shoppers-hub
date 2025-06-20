@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { getOrderById } from "@/actions/orders/getOrderById";
 import Button from "@/components/Button";
 

@@ -47,7 +47,7 @@ export default function CartPage() {
           setUser(userData);
         } else {
           // User is NOT authenticated - redirect to auth
-          router.push("/auth");
+          router.push("/auth?type=login");
         }
       } catch (error) {
         console.error(`Error fetching user session:`, error);
