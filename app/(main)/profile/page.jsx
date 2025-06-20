@@ -130,13 +130,20 @@ export default function ProfilePage() {
                   </AvatarFallback>
                 </Avatar>
 
-                <div>
-                  <h2 className="text-2xl font-semibold text-purple-500">
-                    {user?.name.split(" ")[0].charAt(0) +
-                      user?.name.split(" ")[1].charAt(0)}
-                  </h2>
+                <div className="flex flex-row flex-1 justify-between">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-purple-500">
+                      {user?.name.split(" ")[0].charAt(0) +
+                        user?.name.split(" ")[1].charAt(0)}
+                    </h2>
 
-                  <p className="text-gray-500">{user?.name}</p>
+                    <p className="text-gray-500">{user?.name}</p>
+                  </div>
+                  <div>
+                    <h2 className="text-gray-500">{user?.email}</h2>
+
+                    <p className="text-gray-500">{user?.phone}</p>
+                  </div>
                 </div>
               </div>
             </div>
