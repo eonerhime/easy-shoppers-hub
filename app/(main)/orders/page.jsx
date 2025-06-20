@@ -1,20 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { getOrdersByUser } from "@/actions/orders/getOrdersByUser";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { account } from "@/lib/appwrite";
 import {
+  AlertCircle,
+  CheckCircle,
   Package,
   Truck,
-  CheckCircle,
-  AlertCircle,
   XSquareIcon,
-  ArrowLeft,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getOrdersByUser } from "@/actions/orders/getOrdersByUser";
-import { account } from "@/lib/appwrite";
-import { toast } from "sonner";
+import { useEffect, useState } from "react";
 
 const orderStatusIcons = {
   processing: <Package className="w-5 h-5 text-yellow-500" />,
@@ -29,7 +27,6 @@ const orderStatusIcons = {
 export default function MyOrdersPage() {
   const [orders, setOrders] = useState({ items: [], total: 0 });
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -44,16 +41,13 @@ export default function MyOrdersPage() {
 
         // Get user session first
         const userData = await account.get();
-        setUser(userData);
 
         // Then fetch orders with user ID
         const response = await getOrdersByUser(userData.$id);
 
-        const { success, data } = response;
+        const { data } = response;
 
         if (data) {
-          console.log("Data length:", data.length);
-
           setOrders({
             items: data.reverse(),
             total: data.length,
