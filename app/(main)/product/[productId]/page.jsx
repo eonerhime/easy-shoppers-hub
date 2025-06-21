@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useCartStore from "@/hooks/useCartStore";
-import { getProductDetails } from "@/actions/products/getProductDetails";
+import { getProductDetails } from "@/lib/getProductDetails";
 import ProductCatalog from "@/components/ProductCatalog";
 import { toast } from "sonner";
 import Image from "next/image";
-import { getRelatedProducts } from "@/actions/products/getRelatedProducts";
+import { getRelatedProducts } from "@/lib/getRelatedProducts";
 
 export default function ProductDetailPage({ params }) {
   const [documentId, setDocumentId] = useState(null);

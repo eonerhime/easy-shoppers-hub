@@ -66,16 +66,17 @@ export default async function OrderConfirmationPage({ params }) {
             <div className="text-right">
               <span
                 className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                  data.status === "confirmed"
+                  data.paymentStatus === "confirmed"
                     ? "bg-green-100 text-green-800"
-                    : data.status === "processing"
+                    : data.paymentStatus === "processing"
                       ? "bg-yellow-100 text-yellow-800"
-                      : data.status === "shipped"
+                      : data.paymentStatus === "shipped"
                         ? "bg-blue-100 text-blue-800"
                         : "bg-gray-100 text-gray-800"
                 }`}
               >
-                {data?.status?.charAt(0).toUpperCase() + data?.status?.slice(1)}
+                {data?.paymentStatus?.charAt(0).toUpperCase() +
+                  data?.paymentStatus?.slice(1)}
               </span>
             </div>
           </div>

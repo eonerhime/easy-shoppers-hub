@@ -1,5 +1,3 @@
-"use server";
-
 import { databases, ID } from "@/lib/appwrite";
 
 function generateOrderNumber() {
@@ -10,18 +8,17 @@ function generateOrderNumber() {
   return `ORD-${timestamp}${random}`;
 }
 
-export default async function createOrder(data) {
+export default async function createOrder(orderDetails) {
   try {
-    // Prepare order document
+    // Complete order document details
     const orderDocument = {
-      ...data,
+      ...orderDetails,
       orderNumber: generateOrderNumber(),
       paymentStatus: "confirmed",
-      paymentMethod: data.paymentMethod || "stripe",
+      paymentMethod: orderDetails.paymentMethod || "stripe",
 
       // Order items as JSON string
-      // products: data.products,
-      products: JSON.stringify(data.products),
+      products: JSON.stringify(orderDetails.products),
 
       // Timestamps
       orderDate: new Date().toISOString(),
@@ -38,7 +35,6 @@ export default async function createOrder(data) {
     return {
       success: true,
       order: order,
-      orderNumber: order.orderNumber,
     };
   } catch (error) {
     console.error("Error creating order:", error);

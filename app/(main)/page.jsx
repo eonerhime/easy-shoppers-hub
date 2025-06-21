@@ -1,6 +1,6 @@
 "use client";
 
-import { getProductsWithImages } from "@/actions/products/getProductsWithImages";
+import { getProductsWithImages } from "@/lib/getProductsWithImages";
 import ProductCatalog from "@/components/ProductCatalog";
 import { Button } from "@/components/ui/button";
 import useCartStore from "@/hooks/useCartStore";
