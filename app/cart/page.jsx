@@ -93,7 +93,7 @@ export default function CartPage() {
     setOrderItems(order);
 
     // Route user to the Checkout page
-    router.push("/checkout");
+    router.push(`/checkout?tax=${tax}`);
   };
 
   return (

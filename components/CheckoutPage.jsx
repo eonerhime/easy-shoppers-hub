@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import useCartStore from "@/hooks/useCartStore";
 import { ArrowLeft } from "lucide-react";
 import createOrder from "@/actions/orders/create-order";
@@ -13,12 +13,14 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [checkoutItems, setCheckoutItems] = useState({});
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Zustand store hooks - safe to use since component is client-only
   const orderItems = useCartStore((state) => state.orderItems);
   const setOrderItems = useCartStore((state) => state.setOrderItems);
   const cartItems = useCartStore((state) => state.cart);
   const clearCart = useCartStore((state) => state.clearCart);
+  const taxAmount = Number(searchParams.get("tax"));
 
   // Store order items to state on page load
   useEffect(() => {
@@ -60,30 +62,43 @@ export default function CheckoutPage() {
       setCheckoutItems(updatedCheckoutItems);
 
       // Create the order
-      const result = await createOrder(updatedCheckoutItems);
+      const { success, order, error } = await createOrder(updatedCheckoutItems);
 
-      if (result.success) {
+      if (success) {
         toast.success("Order placed successfully!");
 
-        // Call fnx to send order confirmation email
-        sendOrderConfirmation(result?.order);
+        try {
+          const emailResult = await sendOrderConfirmation(order);
+
+          console.log("SEND RESULT:", emailResult);
+
+          if (emailResult.success) {
+            toast.success("Confirmation email sent successfully!");
+          } else {
+            console.error("Email failed to send:", emailResult.error);
+
+            toast.warning(
+              "Order created but confirmation email failed to send"
+            );
+          }
+        } catch (emailError) {
+          console.error("Email sending error:", emailError);
+          toast.warning("Order created but confirmation email failed to send");
+        }
 
         // Clear cart state
         clearCart();
 
         // Update order items in state with updated order details
-        setOrderItems(result.order);
+        setOrderItems(order);
 
         // Redirect to order confirmation page
-        router.push(`/order-confirmation/${result.order.orderNumber}`);
-
-        // return result;
+        router.push(`/order-confirmation/${order.orderNumber}`);
       } else {
-        toast.error("Order creation failed: " + result.error);
-        throw new Error(result.error);
+        toast.error("Order creation failed: " + error);
+        throw new Error(error); // Fixed: was using result.error instead of error
       }
     } catch (err) {
-      // setError(err.message);
       toast.error("Error: " + err.message);
     } finally {
       setLoading(false);
@@ -221,17 +236,55 @@ export default function CheckoutPage() {
               <span>
                 {item.name} x {item.quantity}
               </span>
-              <span>${(item.price * item.quantity).toFixed(2)}</span>
+              <span>
+                $
+                {(item.price * item.quantity).toLocaleString("en-us", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
             </div>
           ))}
           <div className="border-t pt-2 mt-2">
             <div className="flex justify-between font-semibold">
-              <span>Total: </span>
+              <span>Subtotal: </span>
               <span>
                 $
                 {cartItems
                   .reduce((sum, item) => sum + item.price * item.quantity, 0)
-                  .toFixed(2)}
+                  .toLocaleString("en-us", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+              </span>
+            </div>
+          </div>
+          <div className="border-t pt-2 mt-2">
+            <div className="flex justify-between font-semibold">
+              <span>Tax: </span>
+              <span>
+                $
+                {taxAmount.toLocaleString("en-us", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+          </div>
+          <div className="border-t pt-2 mt-2">
+            <div className="flex justify-between font-semibold">
+              <span>Grand Total: </span>
+              <span>
+                ${" "}
+                {(
+                  cartItems.reduce(
+                    (sum, item) => sum + item.price * item.quantity,
+                    0
+                  ) + taxAmount
+                ).toLocaleString("en-us", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </span>
             </div>
           </div>

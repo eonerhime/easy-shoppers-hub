@@ -163,14 +163,20 @@ export default function ProfilePage() {
                 <StatCard
                   icon={<DollarSign className="h-8 w-8 text-purple-500" />}
                   title="Lifetime Spent"
-                  value={`$${stats.lifetimeSpent.toFixed(2)}`}
+                  value={`$${stats.lifetimeSpent.toLocaleString("en-us", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`}
                 />
 
                 <StatCard
                   icon={<Calendar className="h-8 w-8 text-purple-500" />}
                   title="This Year"
                   value={`${stats.yearlyOrders} orders`}
-                  subvalue={`$${stats.yearlySpent.toFixed(2)} spent`}
+                  subvalue={`$${stats.yearlySpent.toLocaleString("en-us", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })} spent`}
                 />
               </div>
             </div>

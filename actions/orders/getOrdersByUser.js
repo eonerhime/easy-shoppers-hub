@@ -4,8 +4,6 @@ import { Query } from "appwrite";
 import { databases } from "@/lib/appwrite";
 
 export async function getOrdersByUser(userId) {
-  console.log("Fetching orders for user:", userId);
-
   // Ensure user is authenticated
   if (!userId) {
     return { success: false, error: "User not authenticated" };
@@ -25,4 +23,3 @@ export async function getOrdersByUser(userId) {
     return { success: false, error: error.message };
   }
 }
-

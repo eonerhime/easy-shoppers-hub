@@ -69,10 +69,10 @@ export default async function OrderConfirmationPage({ params }) {
                   data.paymentStatus === "confirmed"
                     ? "bg-green-100 text-green-800"
                     : data.paymentStatus === "processing"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : data.paymentStatus === "shipped"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-800"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : data.paymentStatus === "shipped"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-gray-100 text-gray-800"
                 }`}
               >
                 {data?.paymentStatus?.charAt(0).toUpperCase() +
@@ -150,10 +150,13 @@ export default async function OrderConfirmationPage({ params }) {
                   <span className="text-gray-900">Total</span>
                   <span className="text-gray-900">
                     $
-                    {data.totalAmount.toLocaleString("en-us", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }) || "0.00"}
+                    {(data.totalAmount + data.taxAmount).toLocaleString(
+                      "en-us",
+                      {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }
+                    )}
                   </span>
                 </div>
               </div>

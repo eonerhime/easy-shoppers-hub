@@ -1,42 +1,43 @@
-"use client";
+import emailjs from "@emailjs/browser";
 
-import useCartStore from "@/hooks/useCartStore";
-import { resend } from "@/lib/resend";
-import { useEffect } from "react";
-import { toast } from "sonner";
+export async function sendOrderConfirmation(orderData) {
+  console.log("Received order details:", typeof orderData.products);
+  
+  const products = JSON.parse(orderData.products).map(product => ({
+  product_name: product.productName,
+  units: product.productCount,
+  price: product.productPrice,
+  item: product.productImage
+}));
+  
+  console.log("PRODUCTS LISTS:", products)
+  console.log("PRODUCTS LISTS TYPE:", typeof products)
 
-export function sendOrderConfirmation() {
-  const orderData = useCartStore((state) => state.orderItems);
+  try {
+    const result = await emailjs.send(
+      "service_n8i2grb",
+      "template_p94nn1s",
+      {
+        to_email: orderData.email,
+        order_number: orderData.orderNumber,
+        customer_name: orderData.name,
+        sub_total: orderData.subtotal,
+        tax_amount: orderData.taxAmount,
+        shipping_amount: orderData.shippingAmount || "0.00",
+        total_amount: Number(orderData.subtotal) + Number(orderData.taxAmount),
+        payment_status: orderData.paymentStatus,
+        order_notes: orderData.orderNotes,
+        ship_to_address: orderData.shipToAddress,
+        ship_to_city: orderData.shipToCity,
+        zipcode: orderData.zipCode,
+        order_date: orderData.orderDate.split("T")[0],
+        orders: products,
+      },
+      "7EwHPHWv9ecVPr3Hp"
+    );
 
-  useEffect(() => {
-    const orderConfirmation = async () => {
-      try {
-        const { data, error } = await resend.emails.send({
-          from: "orders@easyshoppershub.com",
-          to: [orderData.email],
-          subject: `Order Confirmation - ${orderData.orderNumber}`,
-          html: `
-      <h2>Thank you for your order!</h2>
-      <p>Order Number: <strong>${orderData.orderNumber}</strong></p>
-      <p>Order Date: ${new Date(orderData.orderDate).toLocaleDateString()}</p>
-      <p>Total: ${orderData.total}</p>
-      <p>Shipping Address: ${orderData.shipToAddress}, ${orderData.shipToCity}</p>
-      <p>We'll send you tracking information once your order ships.</p>
-      `,
-        });
-
-        if (error) {
-          toast.error("Email send failed:", error);
-          return false;
-        }
-
-        toast.success("Order confirmation sent:");
-        return true;
-      } catch (error) {
-        console.error("Email error:", error);
-        return false;
-      }
-    };
-    orderConfirmation();
-  }, []);
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error.text };
+  }
 }
