@@ -1,4 +1,4 @@
-import { getOrderById } from "@/actions/orders/getOrderById";
+import { getOrderById } from "@/lib/orders/getOrderById";
 import Button from "@/components/Button";
 
 export async function generateMetadata({ params }) {

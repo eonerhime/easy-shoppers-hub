@@ -1,6 +1,6 @@
 "use client";
 
-import { getOrdersByUser } from "@/actions/orders/getOrdersByUser";
+import { getOrdersByUser } from "@/lib/orders/getOrdersByUser";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { account } from "@/lib/appwrite";
 import { Calendar, DollarSign, Package } from "lucide-react";

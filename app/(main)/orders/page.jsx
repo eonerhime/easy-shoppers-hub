@@ -1,6 +1,6 @@
 "use client";
 
-import { getOrdersByUser } from "@/actions/orders/getOrdersByUser";
+import { getOrdersByUser } from "@/lib/orders/getOrdersByUser";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { account } from "@/lib/appwrite";
