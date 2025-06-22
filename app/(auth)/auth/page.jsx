@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import getUserSession from "@/actions/auth/getUserSession";
+import Link from "next/link";
 
 export default function LoginSignupPage() {
   const [name, setName] = useState("");
@@ -381,6 +382,14 @@ export default function LoginSignupPage() {
                 {isLogin ? "Sign up" : "Sign in"}
               </button>
             </p>
+            <div className="flex flex-row justify-between mt-6 text-blue-700  cursor-pointer">
+              <Link href="/privacy-policy" className="hover:underline">
+                Privacy Policy
+              </Link>
+              <Link href="/terms-of-service" className="hover:underline">
+                Terms of Service
+              </Link>
+            </div>
           </div>
         </div>
       </main>

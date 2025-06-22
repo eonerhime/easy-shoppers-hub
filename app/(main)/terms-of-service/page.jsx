@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import {
   ChevronDown,
@@ -6,11 +8,14 @@ import {
   AlertTriangle,
   Clock,
   User,
+  ArrowLeft,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const TermsOfService = () => {
   const [expandedSections, setExpandedSections] = useState({});
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const router = useRouter();
 
   const toggleSection = (sectionId) => {
     setExpandedSections((prev) => ({
@@ -72,6 +77,15 @@ const TermsOfService = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white">
+      {/* Back button to previous page */}
+      <button
+        className="mb-8 flex items-center text-purple-500 hover:text-purple-600 transition-colors duration-300 cursor-pointer"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="mr-2 h-5 w-5" />
+        Back
+      </button>
+
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
