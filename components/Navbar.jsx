@@ -18,6 +18,7 @@ import getUserSession from "@/actions/auth/getUserSession";
 import { logoutAction } from "@/actions/auth/auth";
 import { useRouter } from "next/navigation";
 import useCartStore from "@/hooks/useCartStore";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -28,6 +29,7 @@ export default function Navbar() {
   const mobileMenuRef = useRef(null);
   const router = useRouter();
   const cartItems = useCartStore((state) => state.cart);
+  const pathname = usePathname();
 
   // Function to get user session
   const refreshUserSession = async () => {
@@ -83,13 +85,24 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    await logoutAction();
-
-    router.push("/");
-
-    setUser(null);
-
-    setIsMobileMenuOpen(false); // Close mobile menu on logout
+    try {
+      await logoutAction();
+    } catch (error) {
+      if (
+        error?.code === 401 ||
+        error?.message?.toLowerCase().includes("missing scope")
+      ) {
+        // User is already logged out — safe to ignore
+        console.warn("User already logged out or no active session.");
+      } else {
+        console.error("Logout failed:", error);
+      }
+    } finally {
+      setSession(null);
+      setUser(null);
+      setIsMobileMenuOpen(false); // Close mobile menu on logout
+      router.push("/");
+    }
   };
 
   const handleSearch = (e) => {
@@ -230,7 +243,12 @@ export default function Navbar() {
             {!isLoading && !user && (
               <div className="flex space-x-2">
                 <div>
-                  <Link href="/auth?type=login">
+                  {/* <Link href="/auth?type=login"> */}
+                  <Link
+                    href={`/auth?type=login&from=${encodeURIComponent(
+                      pathname
+                    )}`}
+                  >
                     <Button
                       variant="outline"
                       className="bg-gradient-to-r from-purple-600 via-teal-500 to-green-500 bg-clip-text text-transparent border-2 border-gray-300 cursor-pointer"
@@ -241,7 +259,12 @@ export default function Navbar() {
                 </div>
 
                 <div>
-                  <Link href="/auth?type=signup">
+                  {/* <Link href="/auth?type=signup"> */}
+                  <Link
+                    href={`/auth?type=login&from=${encodeURIComponent(
+                      pathname
+                    )}`}
+                  >
                     <Button className="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white cursor-pointer">
                       Sign Up
                     </Button>

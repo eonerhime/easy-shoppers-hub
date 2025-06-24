@@ -1,4 +1,3 @@
-// Remove "use server" and make this a client-side function
 import { account } from "@/lib/appwrite";
 
 export default async function getUserSession() {

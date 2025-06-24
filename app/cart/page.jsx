@@ -16,7 +16,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function CartPage() {
@@ -27,6 +27,7 @@ export default function CartPage() {
   const removeItem = useCartStore((state) => state.removeItem);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const pathname = usePathname();
 
   // Simulate loading state for 1.5 seconds
   useEffect(() => {
@@ -238,7 +239,11 @@ export default function CartPage() {
                 <Button
                   className="w-full mt-6 bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white font-semibold cursor-pointer"
                   disabled={!cartItems.length}
-                  onClick={() => router.push("/auth?type=login")}
+                  onClick={() =>
+                    router.push(
+                      `/auth?type=login&from=${encodeURIComponent(pathname)}`
+                    )
+                  }
                 >
                   {!cartItems.length ? (
                     <>

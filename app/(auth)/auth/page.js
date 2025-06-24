@@ -1,6 +1,7 @@
 "use client";
 
 import { loginAction, signupAction } from "@/actions/auth/auth";
+import { account } from "@/lib/appwrite";
 import {
   ArrowLeft,
   Eye,
@@ -11,11 +12,12 @@ import {
   Sun,
   User,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useRouter, useSearchParams } from "next/navigation";
-import getUserSession from "@/actions/auth/getUserSession";
-import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 
 export default function LoginSignupPage() {
   const [name, setName] = useState("");
@@ -28,52 +30,29 @@ export default function LoginSignupPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const [redirectTo, setRedirectTo] = useState("/");
 
+  // Get params from login/ signup redirect
   useEffect(() => {
-    const type = searchParams.get("type");
+    const query = new URLSearchParams(window.location.search);
 
-    setIsLogin(type === "login");
-    setIsSignUp(type !== "login");
-  }, [searchParams]);
+    const typeParam = query.get("type");
+    const from = query.get("from");
 
-  // Function to get user session (extracted for reuse)
-  const refreshUserSession = async () => {
-    try {
-      const result = await getUserSession();
+    setRedirectTo(from || "/");
+    setIsLogin(typeParam === "login");
+    setIsSignUp(typeParam !== "login");
+  }, [pathname]);
 
-      if (result) {
-        const { user: activeUser, session: userSession } = result;
-
-        setUser(activeUser);
-        setSession(userSession);
-        return { user: activeUser, session: userSession };
-      } else {
-        // Don't show error toast on login page - this is expected
-        setUser(null);
-        setSession(null);
-        return null;
-      }
-    } catch (error) {
-      console.error("Error getting user session:", error);
-      setUser(null);
-      setSession(null);
-      return null;
+  // If there's an active user, redirect user
+  useEffect(() => {
+    if (session) {
+      console.log("Redirecting to:", redirectTo);
+      router.push(redirectTo);
     }
-  };
-
-  // Check for user session on page load
-  useEffect(() => {
-    refreshUserSession();
-  }, []);
-
-  // Redirect if user is already logged in
-  // useEffect(() => {
-  //   if (user && session) {
-  //     router.back();
-  //   }
-  // }, [user, session, router]);
+  }, [session]);
 
   const handleLogin = async () => {
     return await loginAction(email, password);
@@ -83,20 +62,17 @@ export default function LoginSignupPage() {
     return await signupAction(email, password, name);
   };
 
+  // New: trigger session check only after login/signup
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Set loading state
     setIsLoading(true);
 
-    // Check if user entered an email and/or password
     if (!email || !password) {
       toast.error("Please fill in all fields");
       setIsLoading(false);
       return;
     }
 
-    // Check length of password
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters long");
       setIsLoading(false);
@@ -106,27 +82,29 @@ export default function LoginSignupPage() {
     try {
       const result = isLogin ? await handleLogin() : await handleSignup();
 
+      console.log("RESULT", result);
+
       if (result.success) {
         toast.success(`${isLogin ? "Login" : "Signup"} successful!`);
-
-        // Refresh session data after successful login/signup
-
-        // Clear form
         setEmail("");
         setPassword("");
 
-        const sessionData = await refreshUserSession();
+        // manually check session
+        const user = await account.get();
+        const session = await account.getSession("current");
+        const userSession = { user, session };
 
-        if (sessionData) {
-          // Redirect to previous viewed page
+        console.log("userSession", userSession);
 
-          router.back();
+        if (userSession?.session) {
+          setSession(userSession.session);
+          router.push(redirectTo);
+          console.log(session);
         }
       } else {
         toast.error(result.error);
       }
     } catch (error) {
-      // Catch any unexpected errors (network issues, etc.)
       toast.error(error.message || "An unexpected error occurred");
       console.error("Login/Signup error:", error);
     } finally {

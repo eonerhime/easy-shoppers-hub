@@ -140,7 +140,9 @@ export default function ProfilePage() {
                     <p className="text-gray-500">{user?.name}</p>
                   </div>
                   <div>
-                    <h2 className="text-gray-500">{user?.email}</h2>
+                    <h2 className="hidden sm:block text-gray-500">
+                      {user?.email}
+                    </h2>
 
                     <p className="text-gray-500">{user?.phone}</p>
                   </div>
