@@ -156,7 +156,7 @@ export default function CheckoutPage() {
                 }))
               }
               className="border rounded px-3 py-2"
-              required
+              // required
             />
             <input
               name="email"
