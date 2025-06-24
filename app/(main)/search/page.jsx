@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import { searchProducts } from "@/lib/products/searchProducts";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function Component() {
