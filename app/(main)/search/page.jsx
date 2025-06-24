@@ -1,17 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import { searchProducts } from "@/lib/products/searchProducts";
 import { toast } from "sonner";
 
 export default function Component() {
   const [isLoading, setIsLoading] = useState(true);
-  const params = useSearchParams();
-  const query = params.get("searchTerm");
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
+  const pathname = usePathname();
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const searchQuery = new URLSearchParams(window.location.search);
+    const searchParam = searchQuery.get("searchTerm");
+
+    setQuery(searchParam);
+  }, [pathname]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -84,7 +91,7 @@ export default function Component() {
           ) : (
             <div
               key="products"
-              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6"
             >
               {products.map((product) => (
                 <div key={product.$id}>
