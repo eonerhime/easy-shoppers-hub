@@ -1,26 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import createOrder from "@/actions/orders/create-order";
+import { sendOrderConfirmation } from "@/actions/orders/sendOrderConfirmation";
 import useCartStore from "@/hooks/useCartStore";
 import { ArrowLeft } from "lucide-react";
-import createOrder from "@/actions/orders/create-order";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { sendOrderConfirmation } from "@/actions/orders/sendOrderConfirmation";
 
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [checkoutItems, setCheckoutItems] = useState({});
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   // Zustand store hooks - safe to use since component is client-only
   const orderItems = useCartStore((state) => state.orderItems);
   const setOrderItems = useCartStore((state) => state.setOrderItems);
   const cartItems = useCartStore((state) => state.cart);
   const clearCart = useCartStore((state) => state.clearCart);
-  const taxAmount = Number(searchParams.get("tax"));
+  const query = new URLSearchParams(window.location.search);
+  const taxAmount = Number(query.get("tax"));
 
   // Store order items to state on page load
   useEffect(() => {
