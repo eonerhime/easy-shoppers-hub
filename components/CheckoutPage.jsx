@@ -148,7 +148,7 @@ export default function CheckoutPage() {
             <input
               name="lastName"
               placeholder="Last Name"
-              value={orderItems?.name?.split(" ")?.at(1) || ""}
+              value={checkoutItems?.name?.split(" ")?.at(1) || ""}
               onChange={(e) =>
                 setCheckoutItems((prev) => ({
                   ...prev,
@@ -156,7 +156,7 @@ export default function CheckoutPage() {
                 }))
               }
               className="border rounded px-3 py-2"
-              // required
+              required
             />
             <input
               name="email"
