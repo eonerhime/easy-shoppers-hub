@@ -342,8 +342,11 @@ export default function Navbar() {
             {!isLoading && user && (
               <div className="flex items-center px-5 mb-3">
                 <div className="flex-shrink-0">
-                  <Avatar className="h-8 w-8 border-2 border-gray-700">
-                    <AvatarFallback>{user.name}</AvatarFallback>
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white">
+                      {user.name.split(" ").at(0).charAt(0) +
+                        user.name.split(" ").at(1).charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                 </div>
 
@@ -375,6 +378,22 @@ export default function Navbar() {
                   onClick={handleMenuItemClick}
                 >
                   Orders
+                </Link>
+
+                <Link
+                  href="/privacy-policy"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-blue-500"
+                  onClick={handleMenuItemClick}
+                >
+                  <span>Privacy Policy</span>
+                </Link>
+
+                <Link
+                  href="/terms-of-service"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-blue-500"
+                  onClick={handleMenuItemClick}
+                >
+                  <span>Terms of Service</span>
                 </Link>
 
                 <button
