@@ -347,6 +347,42 @@ export default function PrivacyPolicy() {
           </p>
         </section>
 
+        {/* User Data Deletion Policy */}
+        <section>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+            User Data Deletion Policy
+          </h2>
+          <p className="text-gray-700 mb-4">
+            If you no longer wish to use our services and want your personal
+            data deleted, you can request full account and data deletion at any
+            time.
+          </p>
+          <ul className="list-disc list-inside text-gray-700 space-y-2">
+            <li>
+              Your account and all associated data will be permanently removed.
+            </li>
+            <li>This action is irreversible and cannot be undone.</li>
+            <li>
+              We will delete your personal information except where required by
+              law to retain it.
+            </li>
+          </ul>
+          <p className="text-gray-700 mt-4">To request deletion:</p>
+          <ol className="list-decimal list-inside text-gray-700 space-y-2 ml-4">
+            <li>Log in to your account.</li>
+            <li>
+              Navigate to the <strong>Delete Account</strong> page.
+            </li>
+            <li>
+              Click <strong>"Delete My Account"</strong> and confirm.
+            </li>
+          </ol>
+          <p className="text-gray-700 mt-4">
+            For questions or help, contact us at{" "}
+            <strong>privacy@easyshoppershub.com</strong>.
+          </p>
+        </section>
+
         {/* Children's Privacy */}
         <section>
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">

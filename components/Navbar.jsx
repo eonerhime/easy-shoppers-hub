@@ -4,7 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, User, Menu, X, LogOut } from "lucide-react";
+import {
+  ShoppingCart,
+  User,
+  Menu,
+  X,
+  LogOut,
+  Shield,
+  FileText,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -222,6 +230,28 @@ export default function Navbar() {
                       <ShoppingCart className="mr-2 h-4 w-4" />
 
                       <span>Orders</span>
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem className="focus:text-purple-600">
+                    <Link
+                      href="/privacy-policy"
+                      className="flex w-full items-center"
+                    >
+                      <Shield className="mr-2 h-4 w-4" />
+
+                      <span>Privacy Policy</span>
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem className="focus:text-purple-600">
+                    <Link
+                      href="/terms-of-service"
+                      className="flex w-full items-center"
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+
+                      <span>Terms of Service</span>
                     </Link>
                   </DropdownMenuItem>
 
