@@ -44,12 +44,11 @@ export default function LoginSignupPage() {
     setRedirectTo(from || "/");
     setIsLogin(typeParam === "login");
     setIsSignUp(typeParam !== "login");
-  }, [pathname]);
+  }, [pathname, redirectTo]);
 
   // If there's an active user, redirect user
   useEffect(() => {
     if (session) {
-      console.log("Redirecting to:", redirectTo);
       router.push(redirectTo);
     }
   }, [session]);
@@ -82,8 +81,6 @@ export default function LoginSignupPage() {
     try {
       const result = isLogin ? await handleLogin() : await handleSignup();
 
-      console.log("RESULT", result);
-
       if (result.success) {
         toast.success(`${isLogin ? "Login" : "Signup"} successful!`);
         setEmail("");
@@ -94,12 +91,10 @@ export default function LoginSignupPage() {
         const session = await account.getSession("current");
         const userSession = { user, session };
 
-        console.log("userSession", userSession);
-
         if (userSession?.session) {
+          setUser(userSession.user);
           setSession(userSession.session);
           router.push(redirectTo);
-          console.log(session);
         }
       } else {
         toast.error(result.error);

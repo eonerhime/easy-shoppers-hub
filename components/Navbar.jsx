@@ -243,7 +243,6 @@ export default function Navbar() {
             {!isLoading && !user && (
               <div className="flex space-x-2">
                 <div>
-                  {/* <Link href="/auth?type=login"> */}
                   <Link
                     href={`/auth?type=login&from=${encodeURIComponent(
                       pathname
@@ -259,9 +258,8 @@ export default function Navbar() {
                 </div>
 
                 <div>
-                  {/* <Link href="/auth?type=signup"> */}
                   <Link
-                    href={`/auth?type=login&from=${encodeURIComponent(
+                    href={`/auth?type=signup&from=${encodeURIComponent(
                       pathname
                     )}`}
                   >
