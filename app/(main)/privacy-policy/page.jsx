@@ -1,21 +1,33 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 export default function PrivacyPolicy() {
   const router = useRouter();
+  const pathname = usePathname();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const searchQuery = new URLSearchParams(window.location.search);
+    const searchParam = searchQuery.get("isMobile");
+
+    setIsMobile(searchParam);
+  }, [pathname]);
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white">
       {/* Back button to previous page */}
-      <button
-        className="mb-8 flex items-center text-purple-500 hover:text-purple-600 transition-colors duration-300 cursor-pointer"
-        onClick={() => router.back()}
-      >
-        <ArrowLeft className="mr-2 h-5 w-5" />
-        Back
-      </button>
+      {isMobile && (
+        <button
+          className="mb-8 flex items-center text-purple-500 hover:text-purple-600 transition-colors duration-300 cursor-pointer"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="mr-2 h-5 w-5" />
+          Back
+        </button>
+      )}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Privacy Policy

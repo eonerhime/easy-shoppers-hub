@@ -235,7 +235,7 @@ export default function Navbar() {
 
                   <DropdownMenuItem className="focus:text-purple-600">
                     <Link
-                      href="/privacy-policy"
+                      href="/privacy-policy?isMobile=false"
                       className="flex w-full items-center"
                     >
                       <Shield className="mr-2 h-4 w-4" />
@@ -246,7 +246,7 @@ export default function Navbar() {
 
                   <DropdownMenuItem className="focus:text-purple-600">
                     <Link
-                      href="/terms-of-service"
+                      href="/terms-of-service?isMobile=false"
                       className="flex w-full items-center"
                     >
                       <FileText className="mr-2 h-4 w-4" />
@@ -381,7 +381,7 @@ export default function Navbar() {
                 </Link>
 
                 <Link
-                  href="/privacy-policy"
+                  href="/privacy-policy?isMobile=true"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-blue-500"
                   onClick={handleMenuItemClick}
                 >
@@ -389,7 +389,7 @@ export default function Navbar() {
                 </Link>
 
                 <Link
-                  href="/terms-of-service"
+                  href="/terms-of-service?isMobile=true"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-blue-500"
                   onClick={handleMenuItemClick}
                 >

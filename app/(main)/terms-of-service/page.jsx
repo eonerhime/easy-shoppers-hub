@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -10,12 +10,21 @@ import {
   User,
   ArrowLeft,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const TermsOfService = () => {
   const [expandedSections, setExpandedSections] = useState({});
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const searchQuery = new URLSearchParams(window.location.search);
+    const searchParam = searchQuery.get("isMobile");
+
+    setIsMobile(searchParam);
+  }, [pathname]);
 
   const toggleSection = (sectionId) => {
     setExpandedSections((prev) => ({
@@ -78,13 +87,15 @@ const TermsOfService = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white">
       {/* Back button to previous page */}
-      <button
-        className="mb-8 flex items-center text-purple-500 hover:text-purple-600 transition-colors duration-300 cursor-pointer"
-        onClick={() => router.back()}
-      >
-        <ArrowLeft className="mr-2 h-5 w-5" />
-        Back
-      </button>
+      {isMobile && (
+        <button
+          className="mb-8 flex items-center text-purple-500 hover:text-purple-600 transition-colors duration-300 cursor-pointer"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="mr-2 h-5 w-5" />
+          Back
+        </button>
+      )}
 
       {/* Header */}
       <div className="text-center mb-8">
