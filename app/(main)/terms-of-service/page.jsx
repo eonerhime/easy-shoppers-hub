@@ -23,7 +23,7 @@ const TermsOfService = () => {
     const searchQuery = new URLSearchParams(window.location.search);
     const searchParam = searchQuery.get("isMobile");
 
-    setIsMobile(searchParam);
+    setIsMobile(searchParam === "true");
   }, [pathname]);
 
   const toggleSection = (sectionId) => {
@@ -87,7 +87,7 @@ const TermsOfService = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white">
       {/* Back button to previous page */}
-      {isMobile && (
+      {!isMobile && (
         <button
           className="mb-8 flex items-center text-purple-500 hover:text-purple-600 transition-colors duration-300 cursor-pointer"
           onClick={() => router.back()}
