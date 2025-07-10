@@ -1,4 +1,4 @@
-import getUserSession from "@/actions/auth/getUserSession";
+import getUserSession from "@/lib/auth/getUserSession";
 
 export async function GET(req) {
   try {

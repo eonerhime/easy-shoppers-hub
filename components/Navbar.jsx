@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import getUserSession from "@/actions/auth/getUserSession";
+import getUserSession from "@/lib/auth/getUserSession";
 import { logoutAction } from "@/actions/auth/auth";
 import { useRouter } from "next/navigation";
 import useCartStore from "@/hooks/useCartStore";
@@ -154,163 +154,164 @@ export default function Navbar() {
           </div>
 
           {/* Right side - Cart and User menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            <div>
-              <Link href="/cart" onClick={handleMenuItemClick}>
-                <Button
-                  size="icon"
-                  className="relative bg-transparent hover:bg-transparent cursor-pointer"
-                  variant="ghost"
-                >
-                  <ShoppingCart className="h-5 w-5 text-gray-600 hover:text-blue-500" />
-                  {cartItems.length > 0 && (
-                    <span className="absolute top-[-3px] right-[-3px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
-                      {cartItems.length}
-                    </span>
-                  )}
-                </Button>
-              </Link>
+          <div className="flex items-center space-x-2">
+            {/* Cart Icon - Always visible */}
+            <Link href="/cart" onClick={handleMenuItemClick}>
+              <Button
+                size="icon"
+                className="relative bg-transparent hover:bg-transparent cursor-pointer"
+                variant="ghost"
+              >
+                <ShoppingCart className="h-5 w-5 text-gray-600 hover:text-blue-500" />
+                {cartItems.length > 0 && (
+                  <span className="absolute top-[-3px] right-[-3px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                    {cartItems.length}
+                  </span>
+                )}
+              </Button>
+            </Link>
+
+            {/* Desktop User menu */}
+            <div className="hidden md:flex items-center space-x-2">
+              {/* Show loading state */}
+              {isLoading && (
+                <div className="flex items-center">
+                  <Avatar className="h-8 w-8 cursor-pointer">
+                    <AvatarFallback className="bg-gradient-to-r from-blue-600 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white">
+                      -
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              )}
+
+              {/* Show user dropdown when user is logged in and not loading */}
+              {!isLoading && user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="relative h-8 w-8 rounded-full"
+                    >
+                      <Avatar className="h-8 w-8 cursor-pointer">
+                        <AvatarFallback className="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white">
+                          {user.name
+                            .split(" ")
+                            .map((word) => word.charAt(0))
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent className="w-56 " align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none bg-gradient-to-r from-purple-600 via-teal-500 to-green-500 bg-clip-text text-transparent">
+                          {user?.name}
+                        </p>
+
+                        <p className="text-xs leading-none text-gray-400">
+                          {user?.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+
+                    <DropdownMenuSeparator className="bg-purple-800" />
+
+                    {/* Profile */}
+                    <DropdownMenuItem className="focus:text-purple-600">
+                      <Link href="/profile" className="flex w-full">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {/* Orders */}
+                    <DropdownMenuItem className="focus:text-purple-600">
+                      <Link href="/orders" className="flex w-full">
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        <span>Orders</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {/* Privacy Policy */}
+                    <DropdownMenuItem className="focus:text-purple-600">
+                      <Link
+                        href="/privacy-policy?isMobile=false"
+                        className="flex w-full items-center"
+                      >
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span>Privacy Policy</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {/* Terms of Service */}
+                    <DropdownMenuItem className="focus:text-purple-600">
+                      <Link
+                        href="/terms-of-service?isMobile=false"
+                        className="flex w-full items-center"
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        <span>Terms of Service</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator className="bg-purple-800" />
+
+                    <DropdownMenuItem
+                      className=" focus:text-purple-600 cursor-pointer"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
+              {/* Show login/signup buttons only when not loading and no user */}
+              {!isLoading && !user && (
+                <div className="flex space-x-2">
+                  <div>
+                    <Link
+                      href={`/auth?type=login&from=${encodeURIComponent(
+                        pathname
+                      )}`}
+                    >
+                      <Button
+                        variant="outline"
+                        className="bg-gradient-to-r from-purple-600 via-teal-500 to-green-500 bg-clip-text text-transparent border-2 border-gray-300 cursor-pointer"
+                      >
+                        Login
+                      </Button>
+                    </Link>
+                  </div>
+
+                  <div>
+                    <Link
+                      href={`/auth?type=signup&from=${encodeURIComponent(
+                        pathname
+                      )}`}
+                    >
+                      <Button className="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white cursor-pointer">
+                        Sign Up
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Show loading state */}
-            {isLoading && (
-              <div className="flex items-center">
-                <Avatar className="h-8 w-8 cursor-pointer">
-                  <AvatarFallback className="bg-gradient-to-r from-blue-600 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white">
-                    -
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            )}
-
-            {/* Show user dropdown when user is logged in and not loading */}
-            {!isLoading && user && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-8 w-8 rounded-full"
-                  >
-                    <Avatar className="h-8 w-8 cursor-pointer">
-                      <AvatarFallback className="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-blue-600 hover:via-teal-600 hover:to-green-600 text-white">
-                        {user.name
-                          .split(" ")
-                          .map((word) => word.charAt(0))
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent className="w-56 " align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none bg-gradient-to-r from-purple-600 via-teal-500 to-green-500 bg-clip-text text-transparent">
-                        {user?.name}
-                      </p>
-
-                      <p className="text-xs leading-none text-gray-400">
-                        {user?.email}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-
-                  <DropdownMenuSeparator className="bg-purple-800" />
-
-                  <DropdownMenuItem className="focus:text-purple-600">
-                    <Link href="/profile" className="flex w-full">
-                      <User className="mr-2 h-4 w-4" />
-
-                      <span>Profile</span>
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem className="focus:text-purple-600">
-                    <Link href="/orders" className="flex w-full">
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-
-                      <span>Orders</span>
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem className="focus:text-purple-600">
-                    <Link
-                      href="/privacy-policy?isMobile=false"
-                      className="flex w-full items-center"
-                    >
-                      <Shield className="mr-2 h-4 w-4" />
-
-                      <span>Privacy Policy</span>
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem className="focus:text-purple-600">
-                    <Link
-                      href="/terms-of-service?isMobile=false"
-                      className="flex w-full items-center"
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-
-                      <span>Terms of Service</span>
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator className="bg-purple-800" />
-
-                  <DropdownMenuItem
-                    className=" focus:text-purple-600 cursor-pointer"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            {/* Show login/signup buttons only when not loading and no user */}
-            {!isLoading && !user && (
-              <div className="flex space-x-2">
-                <div>
-                  <Link
-                    href={`/auth?type=login&from=${encodeURIComponent(
-                      pathname
-                    )}`}
-                  >
-                    <Button
-                      variant="outline"
-                      className="bg-gradient-to-r from-purple-600 via-teal-500 to-green-500 bg-clip-text text-transparent border-2 border-gray-300 cursor-pointer"
-                    >
-                      Login
-                    </Button>
-                  </Link>
-                </div>
-
-                <div>
-                  <Link
-                    href={`/auth?type=signup&from=${encodeURIComponent(
-                      pathname
-                    )}`}
-                  >
-                    <Button className="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white cursor-pointer">
-                      Sign Up
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6 text-gray-300" />
-              ) : (
-                <Menu className="h-6 w-6 text-gray-300" />
-              )}
-            </button>
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6 text-gray-300" />
+                ) : (
+                  <Menu className="h-6 w-6 text-gray-300" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -404,6 +405,7 @@ export default function Navbar() {
                 </button>
               </div>
             )}
+
             {!isLoading && !user && (
               <div className="mt-3 px-2 space-y-1">
                 <Link
