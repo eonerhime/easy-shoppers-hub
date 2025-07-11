@@ -378,7 +378,7 @@ export default function ProductForm() {
                   Product Sizes
                 </Label>
                 <Select
-                  value={formData.productSizes}
+                  value={formData.productSize}
                   onValueChange={handleSelectChange("productSize")}
                 >
                   <SelectItem value="small">S</SelectItem>
