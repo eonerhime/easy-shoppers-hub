@@ -108,9 +108,6 @@ const initialFormData = {
 
 export default function ProductForm() {
   const [formData, setFormData] = useState(initialFormData);
-  const [productQuantity, setProductQuantity] = useState(
-    formData.productQuantity
-  );
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const sku =
@@ -147,11 +144,17 @@ export default function ProductForm() {
   };
 
   const handleIncreaseQuantity = () => {
-    setProductQuantity((prev) => prev + 1);
+    setFormData((prev) => ({
+      ...prev,
+      productQuantity: prev.productQuantity + 1,
+    }));
   };
 
   const handleDecreaseQuantity = () => {
-    setProductQuantity((prev) => Math.max(0, prev - 1));
+    setFormData((prev) => ({
+      ...prev,
+      productQuantity: Math.max(0, prev.productQuantity - 1),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -196,22 +199,17 @@ export default function ProductForm() {
       formData.productSku = sku;
       formData.file = selectedFile;
 
-      console.log("Form Data", formData);
-
       const result = await createProductWithImage(formData);
 
       if (!result.success) throw new Error(result.error || "Unknown error");
 
-      toast(
-        result.success
-          ? toast.success("Product created successfully")
-          : toast.error(
-              `Error creating product: ${result.error || "Unknown error"}`
-            )
-      );
+      result.success
+        ? toast.success("Product created successfully")
+        : toast.error(
+            `Error creating product: ${result.error || "Unknown error"}`
+          );
 
       setFormData(initialFormData);
-      setProductQuantity(0);
       fileInputRef.current.value = null;
 
       return { result: result.success, data: result.data, error: result.error };
@@ -227,7 +225,7 @@ export default function ProductForm() {
         className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-6">
+        <div className="font-bold bg-gradient-to-r from-blue-600 via-teal-500 to-green-500 px-8 py-6">
           <h1 className="uppercase text-2xl font-bold text-white tracking-wide">
             New Product
           </h1>
@@ -404,7 +402,7 @@ export default function ProductForm() {
                   </Button>
                   <div className="bg-white border-2 border-gray-300 rounded-lg px-6 py-2 min-w-[80px] text-center">
                     <span className="text-xl font-bold text-gray-800">
-                      {productQuantity}
+                      {formData.productQuantity}
                     </span>
                   </div>
                   <Button
