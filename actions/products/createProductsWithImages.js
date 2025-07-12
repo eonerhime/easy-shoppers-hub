@@ -10,8 +10,6 @@ import { databases, storage, ID } from "@/lib/appwrite";
 export async function createProductWithImage(formData) {
   let fileResponse = null;
 
-  console.log("FormData received in createProductWithImage:", formData);
-
   try {
     const file = formData.file;
     const name = formData.productName;
